@@ -1,16 +1,13 @@
 package ru.sbt.jschool.session3.problem1;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  */
 public class AccountServiceImpl implements AccountService {
     protected FraudMonitoring fraudMonitoring;
-    ArrayList <Account> list = new ArrayList<>();
-    ArrayList<Long> operationId = new ArrayList<>();
-
+    private ArrayList <Account> list = new ArrayList<>();
+    private Map<Long, Payment> operationId = new HashMap<>();
 
     public AccountServiceImpl(FraudMonitoring fraudMonitoring) {
         this.fraudMonitoring = fraudMonitoring;
@@ -51,21 +48,19 @@ public class AccountServiceImpl implements AccountService {
     @Override public Result doPayment(Payment payment) {
         Account payer = find(payment.getPayerAccountID());
         Account recipient = find(payment.getRecipientAccountID());
-
+        if (operationId.containsKey(payment.getOperationID())){
+            return Result.ALREADY_EXISTS;
+        }
         if(payer == null){
             return Result.PAYER_NOT_FOUND;
         }
-        if(!findForClient(payment.getRecipientAccountID()).contains(payment.getPayerAccountID())){
+        if (recipient == null || recipient.getClientID() != payment.getRecipientID()){
             return Result.RECIPIENT_NOT_FOUND;
         }
+
+        operationId.put(payment.getOperationID(), payment);
         if (payer.getBalance() < payment.getAmount()){
             return Result.INSUFFICIENT_FUNDS;
-        }
-        operationId.add(payment.getOperationID());
-        for (long i: operationId){
-            if (i == payment.getOperationID()){
-                return Result.ALREADY_EXISTS;
-            }
         }
         if (payer.getCurrency() != recipient.getCurrency()){
             float x = payer.getCurrency().to(payment.getAmount(), recipient.getCurrency());
@@ -74,7 +69,6 @@ public class AccountServiceImpl implements AccountService {
             payer.setBalance(payer.getBalance()-payment.getAmount());
             return Result.OK;
         }
-
         recipient.setBalance(recipient.getBalance() + payment.getAmount());
         payer.setBalance(payer.getBalance() - payment.getAmount());
         return Result.OK;
