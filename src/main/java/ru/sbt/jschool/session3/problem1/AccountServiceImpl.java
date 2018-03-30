@@ -6,7 +6,7 @@ import java.util.*;
  */
 public class AccountServiceImpl implements AccountService {
     protected FraudMonitoring fraudMonitoring;
-    private ArrayList <Account> list = new ArrayList<>();
+    private Map <Long, Account> list = new HashMap<>();
     private Map<Long, Payment> operationId = new HashMap<>();
 
     public AccountServiceImpl(FraudMonitoring fraudMonitoring) {
@@ -21,14 +21,14 @@ public class AccountServiceImpl implements AccountService {
             return Result.ALREADY_EXISTS;
         }
         else {
-            list.add(new Account(clientID, accountID, currency, initialBalance));
+            list.put(accountID, new Account(clientID, accountID, currency, initialBalance));
             return Result.OK;
         }
     }
 
     @Override public List<Account> findForClient(long clientID) {
         ArrayList<Account> _list = new ArrayList<>();
-        for (Account i: list) {
+        for (Account i: list.values()) {
             if(clientID == i.getClientID()){
                 _list.add(i);
             }
@@ -37,12 +37,13 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override public Account find(long accountID) {
-        for (Account i: list) {
-            if(accountID == i.getAccountID()){
-                return list.get(list.indexOf(i));
-            }
-        }
-        return null;
+//        for (Account i: list) {
+//            if(accountID == i.getAccountID()){
+//                return list.get(list.indexOf(i));
+//            }
+//        }
+//        return null;
+        return list.containsKey(accountID)?list.get(accountID):null;
     }
 
     @Override public Result doPayment(Payment payment) {
