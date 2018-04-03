@@ -6,8 +6,11 @@ import java.util.*;
  */
 public class AccountServiceImpl implements AccountService {
     protected FraudMonitoring fraudMonitoring;
-    private Map <Long, Account> list = new HashMap<>();
-    private Map<Long, Payment> operationId = new HashMap<>();
+    private Map <Long, Account> list =   new HashMap<>();
+    private Map <Long, Payment> operationId = new HashMap<>();
+    private Map<Long, List<Account>> clientsList = new HashMap<>();
+
+
 
     public AccountServiceImpl(FraudMonitoring fraudMonitoring) {
         this.fraudMonitoring = fraudMonitoring;
@@ -21,28 +24,20 @@ public class AccountServiceImpl implements AccountService {
             return Result.ALREADY_EXISTS;
         }
         else {
-            list.put(accountID, new Account(clientID, accountID, currency, initialBalance));
+            Account acc = new Account(clientID, accountID, currency, initialBalance);
+            list.put(accountID,acc);
+            List<Account> clientsAcc = new ArrayList<>() ;
+            clientsAcc.add(acc);
+            clientsList.put(clientID, clientsAcc);
             return Result.OK;
         }
     }
-
     @Override public List<Account> findForClient(long clientID) {
-        ArrayList<Account> _list = new ArrayList<>();
-        for (Account i: list.values()) {
-            if(clientID == i.getClientID()){
-                _list.add(i);
-            }
-        }
-        return _list != null ? _list : Collections.EMPTY_LIST;
+        return !clientsList.containsKey(clientID)?Collections.EMPTY_LIST: clientsList.get(clientID);
+
     }
 
     @Override public Account find(long accountID) {
-//        for (Account i: list) {
-//            if(accountID == i.getAccountID()){
-//                return list.get(list.indexOf(i));
-//            }
-//        }
-//        return null;
         return list.containsKey(accountID)?list.get(accountID):null;
     }
 
