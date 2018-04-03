@@ -6,9 +6,9 @@ import java.util.*;
  */
 public class AccountServiceImpl implements AccountService {
     protected FraudMonitoring fraudMonitoring;
-    private Map <Long, Account> list =   new TreeMap<>();
+    private Map <Long, Account> list =   new HashMap<>();
     private Map <Long, Payment> operationId = new HashMap<>();
-    private Map<Long, List<Account>> clientsList = new TreeMap<>();
+    private Map<Long, List<Account>> clientsList = new HashMap<>();
 
 
 
