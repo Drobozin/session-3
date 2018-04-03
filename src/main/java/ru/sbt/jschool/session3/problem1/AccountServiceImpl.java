@@ -6,9 +6,9 @@ import java.util.*;
  */
 public class AccountServiceImpl implements AccountService {
     protected FraudMonitoring fraudMonitoring;
-    private Map <Long, Account> list =   new HashMap<>();
+    private Map <Long, Account> list =   new TreeMap<>();
     private Map <Long, Payment> operationId = new HashMap<>();
-    private Map<Long, List<Account>> clientsList = new HashMap<>();
+    private Map<Long, List<Account>> clientsList = new TreeMap<>();
 
 
 
@@ -26,14 +26,24 @@ public class AccountServiceImpl implements AccountService {
         else {
             Account acc = new Account(clientID, accountID, currency, initialBalance);
             list.put(accountID,acc);
-            List<Account> clientsAcc = new ArrayList<>() ;
+            List<Account> clientsAcc = clientsList.get(clientID) ;
+            if (clientsAcc == null){
+                clientsAcc = new ArrayList<>();
+            }
+            else{
+                for(Account i : clientsAcc){
+                    if(i.getAccountID() == accountID){
+                        return Result.ALREADY_EXISTS;
+                    }
+                }
+            }
             clientsAcc.add(acc);
             clientsList.put(clientID, clientsAcc);
             return Result.OK;
         }
     }
     @Override public List<Account> findForClient(long clientID) {
-        return !clientsList.containsKey(clientID)?Collections.EMPTY_LIST: clientsList.get(clientID);
+        return clientsList.get(clientID);
 
     }
 
